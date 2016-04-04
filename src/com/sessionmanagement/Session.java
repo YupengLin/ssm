@@ -79,6 +79,13 @@ public class Session implements Serializable {
 	public void addLocation() {
 		
 	}
+	public void clearLocation() {
+		
+	}
+	public void updateLocationByOnce(List<ServerID> newLocation) {
+		this.location.clear();
+		this.location.addAll(newLocation);
+	}
 	/**
 	 * 
 	 */

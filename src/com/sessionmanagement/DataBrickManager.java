@@ -12,7 +12,7 @@ public class DataBrickManager {
 		return null;
 	}
 	
-	public int getServerNum() {
+	public static int getServerNum() {
 		return -1;
 	}
 	
