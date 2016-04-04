@@ -29,7 +29,7 @@ public class RPCClient {
 	static final int READ = 1;
 	static final int WRITE = 1;
 	
-	public Cookie write(Session session) throws IOException {
+	public Cookie write(Session session) throws IOException, ClassNotFoundException {
 		String callID = UUID.randomUUID().toString();
 		String message = callID + "_"  + new Integer(WRITE).toString() + session.extractInfo();
 		DatagramSocket rpcSocket = new DatagramSocket();
