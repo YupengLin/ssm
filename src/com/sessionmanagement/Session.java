@@ -92,6 +92,11 @@ public class Session implements Serializable {
 	public void incRebootNum() {
 		
 	}
+	
+	public void setRebootNum(int reboot) {
+		this.rebootNum = reboot;
+	}
+	
 	public void resetRebootNum() {
 		
 	}
@@ -100,6 +105,9 @@ public class Session implements Serializable {
 		return this.ID + "_" + this.version + "_" + this.rebootNum;
 	}
 	
+	public List<ServerID> getLocation(){
+		return this.location;
+	}
 	
 	
 	

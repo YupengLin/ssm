@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -69,9 +70,39 @@ public class RPCClient {
 	
 	
 	
-	public DatagramPacket read(Session session){
+	public Session read(Session session) throws IOException, ClassNotFoundException, EmptyBodyException{
+		String callID = UUID.randomUUID().toString();
+		String message = callID + "_" + new Integer(READ).toString() + session.extractInfo();
+		DatagramSocket rpcSocket = new DatagramSocket();
+		byte[] encodeInfo = convertToBytes(message);
+		List<ServerID> locations = session.getLocation();
+		for(ServerID server : locations) {
+			DatagramPacket sendPacket = new DatagramPacket(encodeInfo, encodeInfo.length, server.getIP(), server.getPort());
+			rpcSocket.send(sendPacket);
+		}
+		byte[] inBuf = new byte[4096];
+		DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
+		rpcSocket.receive(recvPkt);
+		String response = (String) convertFromBytes(inBuf);
+		String[] decodeInfo = response.split("_");
+		if(response == "" || response == null || !decodeInfo[0].equals(callID)) {
+			throw new EmptyBodyException("empty");
+		}
+		int version = Integer.parseInt(decodeInfo[1]);
+		int rebootNum = Integer.parseInt(decodeInfo[2]);
+		String sessionMessage = decodeInfo[3];
 		
-		return null;
+		session.ResetMessage(sessionMessage);
+		
+		
+		
+		return session;
+	}
+	
+	public class EmptyBodyException extends Exception {
+		public EmptyBodyException(String error) {
+			super(error);
+		}
 	}
 	/**
 	 * http://stackoverflow.com/a/30968827
