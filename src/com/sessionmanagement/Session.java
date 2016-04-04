@@ -1,10 +1,11 @@
 package com.sessionmanagement;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public class Session {
+public class Session implements Serializable {
 	
 	private String ID;
 	private int version;
@@ -86,6 +87,10 @@ public class Session {
 	}
 	public void resetRebootNum() {
 		
+	}
+	
+	public String extractInfo() {
+		return this.ID + "_" + this.version + "_" + this.rebootNum;
 	}
 	
 	

@@ -4,11 +4,11 @@ import java.util.List;
 
 public class DataBrickManager {
 	
-	public List<ServerID> getServerID(){
+	public static List<ServerID> getServerID(){
 		return null;
 	}
 	
-	public List<ServerID> getServerIdByNum(int num) {
+	public static List<ServerID> getServerIdByNum(int num) {
 		return null;
 	}
 	
