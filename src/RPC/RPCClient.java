@@ -27,7 +27,7 @@ public class RPCClient {
 	static final int R = F + 1;
 	static final int WQ = R;
 	static final int W = 2 * F + 1;
-	static final int READ = 1;
+	static final int READ = 0;
 	static final int WRITE = 1;
 	
 	public Cookie write(Session session) throws IOException, ClassNotFoundException {
@@ -104,7 +104,7 @@ public class RPCClient {
 			super(error);
 		}
 	}
-	/**
+	/** helper function
 	 * http://stackoverflow.com/a/30968827
 	 * @return
 	 */
@@ -118,7 +118,7 @@ public class RPCClient {
 		    }
 		 return null;
 	}
-	/**
+	/** helper function
 	http://stackoverflow.com/a/30968827
 	*/
 	private Object convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {

@@ -18,5 +18,9 @@ public class ServerID {
 		return port;
 	}
 	
+	public String toString() {
+		return ip.getHostAddress() + ":" + new Integer(port).toString();
+	}
+	
 	
 }

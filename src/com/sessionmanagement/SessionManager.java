@@ -54,7 +54,7 @@ public class SessionManager {
 	 * @return
 	 */
 	private static Session getSessionFromCookie(Cookie cookie) {
-		String cookieContent = cookie.getValue();
+		String cookieContent = cookie.getValue(); // in project1b the id will be lengthy
 		Session session = null;
 		rLock.lock();
 		try{

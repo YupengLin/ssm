@@ -14,6 +14,7 @@ public class Session implements Serializable {
 	private int maxInterval;
 	private Date expirationTime;
 	private int rebootNum;
+	private int sessionNumber;
 	private List<ServerID> location;
 	
 	public Session(){
@@ -76,11 +77,12 @@ public class Session implements Serializable {
 	/**
 	 * 
 	 */
-	public void addLocation() {
+	public void addLocation(ServerID serverId) {
+		this.location.add(serverId);
 		
 	}
 	public void clearLocation() {
-		
+		this.location.clear();
 	}
 	public void updateLocationByOnce(List<ServerID> newLocation) {
 		this.location.clear();
@@ -90,7 +92,7 @@ public class Session implements Serializable {
 	 * 
 	 */
 	public void incRebootNum() {
-		
+		this.rebootNum += 1;
 	}
 	
 	public void setRebootNum(int reboot) {
@@ -98,7 +100,7 @@ public class Session implements Serializable {
 	}
 	
 	public void resetRebootNum() {
-		
+		this.rebootNum = 0;
 	}
 	
 	public String extractInfo() {
@@ -107,6 +109,31 @@ public class Session implements Serializable {
 	
 	public List<ServerID> getLocation(){
 		return this.location;
+	}
+	
+	public void incSessionNumber(){
+		this.sessionNumber += 1;
+	}
+	
+	public String generateKey() {
+		StringBuilder sessionKey = new StringBuilder();
+		sessionKey.append(ID);
+		sessionKey.append("_");
+		
+		sessionKey.append(this.rebootNum);
+		sessionKey.append("_");
+		
+		sessionKey.append(this.sessionNumber);
+		sessionKey.append("_");
+		
+	    sessionKey.append(this.version);
+	    sessionKey.append("_");
+	    
+	    for(ServerID sid : location) {
+	    	sessionKey.append(sid.toString());
+	    	sessionKey.append("_");
+	    }
+	    return sessionKey.toString();
 	}
 	
 	
