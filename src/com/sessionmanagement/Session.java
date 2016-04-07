@@ -19,7 +19,7 @@ public class Session implements Serializable {
 	private ServerID localAddress;
 	
 	public Session(ServerID localAddress, int rebootNum, int sessionNum){
-		this.ID = UUID.randomUUID().toString();
+		this.ID = localAddress.toString();
 		this.version = 1;
 		this.sessionMessage = "Hello User";
 		this.lastActive = new Date();
@@ -28,8 +28,15 @@ public class Session implements Serializable {
 		this.localAddress = localAddress;
 		this.rebootNum = rebootNum;
 		this.sessionNumber = sessionNum;
-		
-
+	}
+	
+	public Session(ServerID localServerID, int rebootNum, int sessionNum, int version, List<ServerID> targetAddress) {
+		this.localAddress = localServerID;
+		this.ID = localServerID.toString();
+		this.rebootNum = rebootNum;
+		this.sessionNumber = sessionNum;
+		this.version = version;
+		this.location.addAll(targetAddress);
 	}
 	
 	public void incVersion() {
@@ -107,8 +114,10 @@ public class Session implements Serializable {
 		this.rebootNum = 0;
 	}
 	
+	
+	
 	public String sessionID() {
-		return this.ID + "_" + this.version + "_" + this.rebootNum;
+		return this.ID + "_" + this.rebootNum + "_" + this.sessionNumber;
 	}
 	
 	public String generateSessionKey(){

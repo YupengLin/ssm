@@ -12,6 +12,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -69,16 +70,25 @@ public class RPCClient  {
 	 * 
 	 * */
 	
-	public Session read(Session session) throws IOException, ClassNotFoundException, EmptyBodyException{
+	public Session read(Session session) throws IOException, ClassNotFoundException, EmptyBodyException, NullPointerException{
 		String callID = UUID.randomUUID().toString();
-		String message = callID + "_" + new Integer(RpcParameter.READ).toString() + session.extractInfo();
+		
+		String queryMessage = "";
+		queryMessage += callID;
+		queryMessage += "_";
+		queryMessage += new Integer(RpcParameter.READ).toString();
+		queryMessage += "_";
+		queryMessage += session.generateSessionKey();
+		
 		DatagramSocket rpcSocket = new DatagramSocket();
-		byte[] encodeInfo = RpcParameter.convertToBytes(message);
+		byte[] encodeInfo = RpcParameter.convertToBytes(queryMessage);
 		List<ServerID> locations = session.getLocation();
+		
 		for(ServerID server : locations) {
 			DatagramPacket sendPacket = new DatagramPacket(encodeInfo, encodeInfo.length, server.getIP(), server.getPort());
 			rpcSocket.send(sendPacket);
 		}
+		
 		byte[] inBuf = new byte[4096];
 		DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 		rpcSocket.receive(recvPkt);
@@ -98,14 +108,56 @@ public class RPCClient  {
 		return session;
 	}
 	
+	public Session read(boolean[] flag, String[] tokens) {
+		 //  svrID_rebootNum_sessNum_version_S1_S2 ... Swq
+		try {
+			ServerID serverID = new ServerID(tokens[0]);
+			int rebootNum = Integer.parseInt(tokens[1]);
+			int sessionNum = Integer.parseInt(tokens[2]);
+			int version = Integer.parseInt(tokens[3]);
+			List<ServerID> answeredServerID = new ArrayList<>();
+			for(int i = 4; i < 4 + RpcParameter.WQ; i++) {
+				answeredServerID.add(new ServerID(tokens[i]));
+			}
+			Session sessionToBeRead = new Session(serverID, rebootNum, sessionNum, version, answeredServerID);
+			this.read(sessionToBeRead);
+		
+		
+		} catch (CorruptedCookieInfoException e) {
+			flag[0] = false;
+		} catch (ClassNotFoundException e) {
+			flag[0] = false;
+			e.printStackTrace();
+		} catch (IOException e) {
+			flag[0] = false;
+			e.printStackTrace();
+		} catch (EmptyBodyException e) {
+			flag[0] = false;
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		
+		
+		return null;
+	}
+	
+
+	public void writeTo(Session session, String version, String data, Date discardTime) {
+		
+	}
+	
+	public class CorruptedCookieInfoException extends NullPointerException {
+		
+	}
+	
 	public class EmptyBodyException extends Exception {
 		public EmptyBodyException(String error) {
 			super(error);
 		}
 	}
-	
-	public void writeTo(Session session, InetAddress address, int port) {
-		
-	}
+
 	
 }

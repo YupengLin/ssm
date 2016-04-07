@@ -43,29 +43,16 @@ public class SessionServlet extends HttpServlet {
 	      // Allocate a output writer to write the response message into the network socket
 	      PrintWriter out = response.getWriter();
 	      
-	      // Write the response message, in an HTML page
-	      Session userSession = SessionManager.getSessionFromRequest(request);
-	     
-	      if(userSession != null) {
-	    	  userSession.incVersion();
-	    	  userSession.refreshTimeStamp();
-	    	  System.out.println("find, VERsion  " + userSession.getVersion());
-	      } else {
-	    	  System.out.println("NOT FIND new session");
-	    	  userSession = SessionManager.generateNewSession(DataBrickManager.getLocalServerID(), this.rebootNumber, this.sessionNumber);
-	    	  this.sessionNumber += 1;
-	    	  
-	      }
-	      
+	  
 	      /*================================================*/
-	      
+	      Session userSession = null;
 	      String cookieInfo = SessionManager.getSessionInfoFromCookie(request);
 	      
 	      if(cookieInfo == "") {
 	    	  System.out.println("generate new session");
 	    	  Session newSession = SessionManager.generateNewSession(DataBrickManager.getLocalServerID(), 
 	    			  this.rebootNumber, this.sessionNumber);
-	    	  
+	    	  userSession = newSession;
 	    	  try {
 				this.rpcClient.write(newSession);
 	    	  } catch (ClassNotFoundException e) {
@@ -73,21 +60,20 @@ public class SessionServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 	      } else {
+	    	  String[] tokens = cookieInfo.split("_");
+	    	  boolean [] readSuccess = new boolean[1];
+	    	  Session retrivedSession = this.rpcClient.read(readSuccess, tokens);
 	    	  
+	    	  retrivedSession.incVersion();
+	    	  retrivedSession.refreshTimeStamp();
+	    	  userSession = retrivedSession; 
+	    	  
+	    	  
+	    	  
+	    	  this.rpcClient.writeTo(retrivedSession, "", "", null);
 	      }
 	     
-	      //List<ServerID> writeServerList = DataBrickManager.getServerIdByNum(RpcParameter.W);
 	      
-	      
-	      
-	      
-	      
-	      
-	      
-	      
-	      
-	      
-	      /*=================================================*/
 	     
 	      String userBehavior = request.getParameter("behavior");
 	      System.out.println("user " + userBehavior);
@@ -100,6 +86,7 @@ public class SessionServlet extends HttpServlet {
 	    		  String updatedMessage = request.getParameter("replacedText");
 	    		  userSession.resetVersion();
 	    		  userSession.ResetMessage(updatedMessage);
+	    		  this.rpcClient.writeTo(userSession, null, null, null);
 	      		}else if(userBehavior.equals("LOGOUT")){
 	      		  try{
 	      		  userSession.setMaxInterval(0);
@@ -112,7 +99,7 @@ public class SessionServlet extends HttpServlet {
 	      		}
 	      }
 	      SessionManager.addNewCookie(response, userSession);
-	      SessionManager.storeSession(userSession);
+	      //SessionManager.storeSession(userSession);
 	      request.setAttribute("SessionVersion", new Integer(userSession.getVersion()).toString());
 	      System.out.println(userSession.getVersion());
 	      /**

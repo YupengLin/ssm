@@ -97,7 +97,7 @@ public class SessionManager {
 	}
 	
 	public static void addNewCookie(HttpServletResponse response, Session session) {
-		Cookie cookie = new Cookie(cookieName, session.getID());
+		Cookie cookie = new Cookie(cookieName, session.generateInfo());
 		response.addCookie(cookie);
 	}
 	
