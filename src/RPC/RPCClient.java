@@ -22,21 +22,16 @@ import com.sessionmanagement.DataBrickManager;
 import com.sessionmanagement.ServerID;
 import com.sessionmanagement.Session;
 
-public class RPCClient {
-	static final int F = 1;
-	static final int R = F + 1;
-	static final int WQ = R;
-	static final int W = 2 * F + 1;
-	static final int READ = 0;
-	static final int WRITE = 1;
+public class RPCClient  {
+	
 	
 	public Cookie write(Session session) throws IOException, ClassNotFoundException {
 		String callID = UUID.randomUUID().toString();
-		String message = callID + "_"  + new Integer(WRITE).toString() + session.extractInfo();
+		String message = callID + "_"  + new Integer(RpcParameter.WRITE).toString() + session.extractInfo();
 		DatagramSocket rpcSocket = new DatagramSocket();
 		rpcSocket.setSoTimeout(3000);
-		byte[] encodeInfo = convertToBytes(message);
-		final int[] numOfwrite = new Random().ints(0,DataBrickManager.getServerNum()).distinct().limit(W).toArray();
+		byte[] encodeInfo = RpcParameter.convertToBytes(message);
+		final int[] numOfwrite = new Random().ints(0,DataBrickManager.getServerNum()).distinct().limit(RpcParameter.W).toArray();
 		List<ServerID> serverList = DataBrickManager.getServerID();
 		List<ServerID> repliedBricks = new ArrayList<ServerID>();
 		for(int index : numOfwrite){
@@ -48,10 +43,10 @@ public class RPCClient {
 		}
 		session.clearLocation();
 		byte[] inBuf = new byte[4096];
-		while(repliedBricks.size() < WQ){
+		while(repliedBricks.size() < RpcParameter.WQ){
 			DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 			rpcSocket.receive(recvPkt);
-			String response = (String) convertFromBytes(inBuf);
+			String response = (String) RpcParameter.convertFromBytes(inBuf);
 		    String[] decodeInfo = response.split("_");
 		    String returnID = decodeInfo[0];
 		    if(returnID.equals(callID)) {
@@ -69,12 +64,16 @@ public class RPCClient {
 	}
 	
 	
+	/* UDP message format
+	 * callerID, operation code, operation code argument
+	 * 
+	 * */
 	
 	public Session read(Session session) throws IOException, ClassNotFoundException, EmptyBodyException{
 		String callID = UUID.randomUUID().toString();
-		String message = callID + "_" + new Integer(READ).toString() + session.extractInfo();
+		String message = callID + "_" + new Integer(RpcParameter.READ).toString() + session.extractInfo();
 		DatagramSocket rpcSocket = new DatagramSocket();
-		byte[] encodeInfo = convertToBytes(message);
+		byte[] encodeInfo = RpcParameter.convertToBytes(message);
 		List<ServerID> locations = session.getLocation();
 		for(ServerID server : locations) {
 			DatagramPacket sendPacket = new DatagramPacket(encodeInfo, encodeInfo.length, server.getIP(), server.getPort());
@@ -83,7 +82,7 @@ public class RPCClient {
 		byte[] inBuf = new byte[4096];
 		DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 		rpcSocket.receive(recvPkt);
-		String response = (String) convertFromBytes(inBuf);
+		String response = (String) RpcParameter.convertFromBytes(inBuf);
 		String[] decodeInfo = response.split("_");
 		if(response == "" || response == null || !decodeInfo[0].equals(callID)) {
 			throw new EmptyBodyException("empty");
@@ -104,28 +103,9 @@ public class RPCClient {
 			super(error);
 		}
 	}
-	/** helper function
-	 * http://stackoverflow.com/a/30968827
-	 * @return
-	 */
-	private byte[] convertToBytes(Object object) {
-		 try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		         ObjectOutput out = new ObjectOutputStream(bos)) {
-		        out.writeObject(object);
-		        return bos.toByteArray();
-		    }  catch  (IOException  e){
-		    	System.err.print(e);
-		    }
-		 return null;
-	}
-	/** helper function
-	http://stackoverflow.com/a/30968827
-	*/
-	private Object convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-	    try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-	         ObjectInput in = new ObjectInputStream(bis)) {
-	        return in.readObject();
-	    } 
+	
+	public void writeTo(Session session, InetAddress address, int port) {
+		
 	}
 	
 }

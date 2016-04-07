@@ -16,14 +16,18 @@ public class Session implements Serializable {
 	private int rebootNum;
 	private int sessionNumber;
 	private List<ServerID> location;
+	private ServerID localAddress;
 	
-	public Session(){
+	public Session(ServerID localAddress, int rebootNum, int sessionNum){
 		this.ID = UUID.randomUUID().toString();
 		this.version = 1;
 		this.sessionMessage = "Hello User";
 		this.lastActive = new Date();
 		this.maxInterval = 30; // 30 seconds
 		this.expirationTime = new Date(this.lastActive.getTime() + 1000 * this.maxInterval);
+		this.localAddress = localAddress;
+		this.rebootNum = rebootNum;
+		this.sessionNumber = sessionNum;
 		
 
 	}
@@ -103,8 +107,12 @@ public class Session implements Serializable {
 		this.rebootNum = 0;
 	}
 	
-	public String extractInfo() {
+	public String sessionID() {
 		return this.ID + "_" + this.version + "_" + this.rebootNum;
+	}
+	
+	public String generateSessionKey(){
+		return this.sessionID() + "_" + this.version;
 	}
 	
 	public List<ServerID> getLocation(){
@@ -115,7 +123,7 @@ public class Session implements Serializable {
 		this.sessionNumber += 1;
 	}
 	
-	public String generateKey() {
+	public String generateInfo() {
 		StringBuilder sessionKey = new StringBuilder();
 		sessionKey.append(ID);
 		sessionKey.append("_");

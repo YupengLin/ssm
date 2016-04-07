@@ -1,5 +1,6 @@
 package com.sessionmanagement;
 
+import java.net.InetAddress;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,6 +54,7 @@ public class SessionManager {
 	 * @param cookie
 	 * @return
 	 */
+	
 	private static Session getSessionFromCookie(Cookie cookie) {
 		String cookieContent = cookie.getValue(); // in project1b the id will be lengthy
 		Session session = null;
@@ -69,13 +71,29 @@ public class SessionManager {
 	}
 	
 	
+	public static String getSessionInfoFromCookie(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+		Cookie matchingCookie = null;
+		for(Cookie cookie : cookies) {
+			if(cookieName.equals(cookie.getName())) {
+				matchingCookie = cookie;
+				break;
+			}
+		}
+		
+		if(matchingCookie == null) {
+			return "";
+		} 
+		return matchingCookie.getValue();
+	}
+	
 	/**
 	 * generate new session
 	 * @return session
 	 */
-	public static Session generateNewSession() {
+	public static Session generateNewSession(ServerID localAddress, int rebootNum, int sessionNum) {
 		// TODO Auto-generated method stub
-		return new Session();
+		return new Session(localAddress, rebootNum,  sessionNum);
 	}
 	
 	public static void addNewCookie(HttpServletResponse response, Session session) {
@@ -97,6 +115,21 @@ public class SessionManager {
 	public static void cleanExpiredSession(){
 		Timer timer = new Timer();
 		timer.schedule(new CleanTask(), ONESECOND, ONESECOND);
+	}
+	
+	public static Session findSessionByID(String key) {
+		//String[] tokens = ID.split("_");
+		Session session = null;
+		rLock.lock();
+		try{
+		  if(sessionContainer.containsKey(key)) {
+			  session = sessionContainer.get(key);
+		  }
+		} finally{
+			rLock.unlock();
+		}
+		return session;
+		
 	}
 	static class CleanTask extends TimerTask{
 

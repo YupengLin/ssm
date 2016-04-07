@@ -20,6 +20,9 @@ public class DataBrickManager {
 		return false;
 	}
 	
+	public static ServerID getLocalServerID() {
+		return null;
+	}
 	
 
 }
