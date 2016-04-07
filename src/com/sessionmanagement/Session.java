@@ -39,6 +39,11 @@ public class Session implements Serializable {
 		this.location.addAll(targetAddress);
 	}
 	
+	public Session(ServerID localServerID, int rebootNum, int sessionNum, int version) {
+		this(localServerID, rebootNum, sessionNum);
+		this.version = version;
+	}
+	
 	public void incVersion() {
 		this.version++;
 	}

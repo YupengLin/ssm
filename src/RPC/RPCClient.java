@@ -70,7 +70,7 @@ public class RPCClient  {
 	 * 
 	 * */
 	
-	public Session read(Session session) throws IOException, ClassNotFoundException, EmptyBodyException, NullPointerException{
+	public void read(Session session) throws IOException, ClassNotFoundException, EmptyBodyException, CorruptedCookieInfoException, NullPointerException{
 		String callID = UUID.randomUUID().toString();
 		
 		String queryMessage = "";
@@ -83,29 +83,35 @@ public class RPCClient  {
 		DatagramSocket rpcSocket = new DatagramSocket();
 		byte[] encodeInfo = RpcParameter.convertToBytes(queryMessage);
 		List<ServerID> locations = session.getLocation();
-		
+		/* Send message format
+		 *  callID _ READ _ sessionKey
+		 *  
+		 * */
 		for(ServerID server : locations) {
 			DatagramPacket sendPacket = new DatagramPacket(encodeInfo, encodeInfo.length, server.getIP(), server.getPort());
 			rpcSocket.send(sendPacket);
 		}
 		
-		byte[] inBuf = new byte[4096];
+		int validRead = 0;
+		byte[] inBuf = new byte[RpcParameter.sessionLength];
 		DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
-		rpcSocket.receive(recvPkt);
-		String response = (String) RpcParameter.convertFromBytes(inBuf);
-		String[] decodeInfo = response.split("_");
-		if(response == "" || response == null || !decodeInfo[0].equals(callID)) {
-			throw new EmptyBodyException("empty");
+		String[] decodeInfo = null;
+		do{
+			recvPkt.setLength(inBuf.length);
+			rpcSocket.receive(recvPkt);
+			String response = (String) RpcParameter.convertFromBytes(inBuf);
+			decodeInfo = response.split("_");
+			
+		} while (!decodeInfo[0].equals(callID));
+		if(decodeInfo.length == 2) {
+		// contain valid caller id and message
+			session.ResetMessage(decodeInfo[1]);
+		} else {
+			throw new CorruptedCookieInfoException("return read does not contain message");
 		}
-		int version = Integer.parseInt(decodeInfo[1]);
-		int rebootNum = Integer.parseInt(decodeInfo[2]);
-		String sessionMessage = decodeInfo[3];
-		
-		session.ResetMessage(sessionMessage);
 		
 		
-		
-		return session;
+	
 	}
 	
 	public Session read(boolean[] flag, String[] tokens) {
@@ -121,10 +127,12 @@ public class RPCClient  {
 			}
 			Session sessionToBeRead = new Session(serverID, rebootNum, sessionNum, version, answeredServerID);
 			this.read(sessionToBeRead);
-		
+			flag[0] = true;
+			return sessionToBeRead;
 		
 		} catch (CorruptedCookieInfoException e) {
 			flag[0] = false;
+			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			flag[0] = false;
 			e.printStackTrace();
@@ -135,13 +143,7 @@ public class RPCClient  {
 			flag[0] = false;
 			e.printStackTrace();
 		}
-		
-		
-		
-		
-		
-		
-		return null;
+		return null;	
 	}
 	
 
@@ -150,6 +152,10 @@ public class RPCClient  {
 	}
 	
 	public class CorruptedCookieInfoException extends NullPointerException {
+
+		public CorruptedCookieInfoException(String error) {
+			super(error);
+		}
 		
 	}
 	

@@ -56,7 +56,7 @@ public class SessionServlet extends HttpServlet {
 	    	  try {
 				this.rpcClient.write(newSession);
 	    	  } catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 	      } else {
