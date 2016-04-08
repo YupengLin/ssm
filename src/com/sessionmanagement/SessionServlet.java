@@ -53,12 +53,9 @@ public class SessionServlet extends HttpServlet {
 	    	  Session newSession = SessionManager.generateNewSession(DataBrickManager.getLocalServerID(), 
 	    			  this.rebootNumber, this.sessionNumber);
 	    	  userSession = newSession;
-	    	  try {
-				this.rpcClient.write(newSession);
-	    	  } catch (ClassNotFoundException e) {
-				
-				e.printStackTrace();
-			}
+	    	 
+				this.rpcClient.writeTo(newSession);
+	    	
 	      } else {
 	    	  String[] tokens = cookieInfo.split("_");
 	    	  boolean [] readSuccess = new boolean[1];
@@ -68,9 +65,7 @@ public class SessionServlet extends HttpServlet {
 	    	  retrivedSession.refreshTimeStamp();
 	    	  userSession = retrivedSession; 
 	    	  
-	    	  
-	    	  
-	    	  this.rpcClient.writeTo(retrivedSession, "", "", null);
+	    	  this.rpcClient.writeTo(retrivedSession);
 	      }
 	     
 	      
@@ -86,7 +81,7 @@ public class SessionServlet extends HttpServlet {
 	    		  String updatedMessage = request.getParameter("replacedText");
 	    		  userSession.resetVersion();
 	    		  userSession.ResetMessage(updatedMessage);
-	    		  this.rpcClient.writeTo(userSession, null, null, null);
+	    		  this.rpcClient.writeTo(userSession);
 	      		}else if(userBehavior.equals("LOGOUT")){
 	      		  try{
 	      		  userSession.setMaxInterval(0);

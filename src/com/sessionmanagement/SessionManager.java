@@ -109,6 +109,26 @@ public class SessionManager {
 			wLock.unlock();
 		}
 	}
+	
+	
+	public static void storeSession(String serverid, String rebootNum, String sessNum, String version,
+			String clientMessage, String time, ServerID clientOrigin) {
+		// TODO Auto-generated method stub
+		String sessionKey = serverid + "_" + rebootNum + "_" + sessNum + "_" + version;
+		int reboot_num = Integer.parseInt(rebootNum);
+		int sess_num = Integer.parseInt(sessNum);
+		int version_num = Integer.parseInt(version);
+		
+		wLock.lock();
+		try{
+			if(!sessionContainer.containsKey(sessionKey)) {
+				
+			}
+		} finally {
+			wLock.unlock();
+		}
+	}
+	
 	/**
 	 * timer thread to check session expiration time every one second
 	 */
@@ -153,5 +173,6 @@ public class SessionManager {
 		}
 		
 	}
+	
 
 }

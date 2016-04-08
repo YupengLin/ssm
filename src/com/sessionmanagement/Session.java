@@ -80,6 +80,8 @@ public class Session implements Serializable {
 		return this.expirationTime;
 	}
 	
+
+	
 	public void setMaxInterval(int second) {
 		this.maxInterval = second;
 		
@@ -90,9 +92,10 @@ public class Session implements Serializable {
 		lastActive = new Date();
 		this.expirationTime.setTime(this.lastActive.getTime() + maxInterval * 1000);
 	}
-	/**
-	 * 
-	 */
+	
+	public void setExpirationTime(Date time){
+		this.expirationTime = time;
+	}
 	public void addLocation(ServerID serverId) {
 		this.location.add(serverId);
 		

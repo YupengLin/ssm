@@ -26,11 +26,16 @@ import com.sessionmanagement.Session;
 public class RPCClient  {
 	
 	
-	public Cookie write(Session session) throws IOException, ClassNotFoundException {
+	public void write(Session session) throws IOException, ClassNotFoundException {
 		String callID = UUID.randomUUID().toString();
-		String message = callID + "_"  + new Integer(RpcParameter.WRITE).toString() + session.extractInfo();
+		String message = callID + "_"  + new Integer(RpcParameter.WRITE).toString() + "_" 
+						+ session.generateSessionKey() + "_"
+						+ session.getMessage() + "_"
+						+ session.getExpirationTime();
+		
 		DatagramSocket rpcSocket = new DatagramSocket();
 		rpcSocket.setSoTimeout(3000);
+		
 		byte[] encodeInfo = RpcParameter.convertToBytes(message);
 		final int[] numOfwrite = new Random().ints(0,DataBrickManager.getServerNum()).distinct().limit(RpcParameter.W).toArray();
 		List<ServerID> serverList = DataBrickManager.getServerID();
@@ -43,7 +48,7 @@ public class RPCClient  {
 	        
 		}
 		session.clearLocation();
-		byte[] inBuf = new byte[4096];
+		byte[] inBuf = new byte[RpcParameter.sessionLength];
 		while(repliedBricks.size() < RpcParameter.WQ){
 			DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 			rpcSocket.receive(recvPkt);
@@ -61,7 +66,7 @@ public class RPCClient  {
 		}
 		session.updateLocationByOnce(serverList);
 		rpcSocket.close();
-		return null;
+		 
 	}
 	
 	
@@ -85,14 +90,13 @@ public class RPCClient  {
 		List<ServerID> locations = session.getLocation();
 		/* Send message format
 		 *  callID _ READ _ sessionKey
-		 *  
 		 * */
 		for(ServerID server : locations) {
 			DatagramPacket sendPacket = new DatagramPacket(encodeInfo, encodeInfo.length, server.getIP(), server.getPort());
 			rpcSocket.send(sendPacket);
 		}
 		
-		int validRead = 0;
+		
 		byte[] inBuf = new byte[RpcParameter.sessionLength];
 		DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 		String[] decodeInfo = null;
@@ -142,17 +146,30 @@ public class RPCClient  {
 		} catch (EmptyBodyException e) {
 			flag[0] = false;
 			e.printStackTrace();
+		} catch (NullPointerException e) {
+			flag[0] = false;
+			e.printStackTrace();
 		}
 		return null;	
 	}
 	
 
-	public void writeTo(Session session, String version, String data, Date discardTime) {
-		
+	public void writeTo(Session session) {
+		try {
+			this.write(session);
+			
+		} catch (CorruptedCookieInfoException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public class CorruptedCookieInfoException extends NullPointerException {
-
 		public CorruptedCookieInfoException(String error) {
 			super(error);
 		}
