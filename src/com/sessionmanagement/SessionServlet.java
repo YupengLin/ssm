@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import RPC.RPCClient;
+import RPC.RPCServer;
 import RPC.RpcParameter;
 
 /**
@@ -23,6 +24,7 @@ public class SessionServlet extends HttpServlet {
     private int sessionNumber = 0;
     private int rebootNumber = 0;
     private RPCClient rpcClient = null;
+    private RPCServer rpcServer = null;
     /** start the auto check timer thread
      * @see HttpServlet#HttpServlet()
      */
@@ -31,6 +33,8 @@ public class SessionServlet extends HttpServlet {
         // TODO Auto-generated constructor stub
         SessionManager.cleanExpiredSession();
         rpcClient = new RPCClient();
+        rpcServer = new RPCServer();
+        rpcServer.start();
     }
 
 	/**

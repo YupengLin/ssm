@@ -1,6 +1,9 @@
 package com.sessionmanagement;
 
 import java.net.InetAddress;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,8 +75,10 @@ public class SessionManager {
 	
 	
 	public static String getSessionInfoFromCookie(HttpServletRequest request) {
-		Cookie[] cookies = request.getCookies();
+		Cookie[] cookies = null;
+		cookies = request.getCookies();
 		Cookie matchingCookie = null;
+		System.out.println(cookies.length);
 		for(Cookie cookie : cookies) {
 			if(cookieName.equals(cookie.getName())) {
 				matchingCookie = cookie;
@@ -115,14 +120,35 @@ public class SessionManager {
 			String clientMessage, String time, ServerID clientOrigin) {
 		// TODO Auto-generated method stub
 		String sessionKey = serverid + "_" + rebootNum + "_" + sessNum + "_" + version;
+		ServerID localServerId = new ServerID(serverid);
 		int reboot_num = Integer.parseInt(rebootNum);
 		int sess_num = Integer.parseInt(sessNum);
 		int version_num = Integer.parseInt(version);
 		
+		DateFormat dateFormatter = new SimpleDateFormat ( "E MMM dd HH:mm:ss Z yyyy" );
+		Date discardTime = null;
+		try {
+			
+			discardTime = dateFormatter.parse(time);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		Session sessionToStore = new Session(localServerId, reboot_num, sess_num, version_num);
+		
+		sessionToStore.setExpirationTime(discardTime);
+		sessionToStore.ResetMessage(clientMessage);
+		sessionToStore.addLocation(clientOrigin);
+		
 		wLock.lock();
 		try{
 			if(!sessionContainer.containsKey(sessionKey)) {
-				
+				sessionContainer.put(sessionKey, sessionToStore);
+			} else {
+				Session existSession = sessionContainer.get(sessionKey);
+				existSession.addLocation(clientOrigin);
+				existSession.ResetMessage(clientMessage);
+				existSession.setExpirationTime(discardTime);
+				sessionContainer.put(sessionKey, existSession);
 			}
 		} finally {
 			wLock.unlock();

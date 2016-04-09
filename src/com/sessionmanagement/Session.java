@@ -1,6 +1,7 @@
 package com.sessionmanagement;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +16,7 @@ public class Session implements Serializable {
 	private Date expirationTime;
 	private int rebootNum;
 	private int sessionNumber;
-	private List<ServerID> location;
+	private List<ServerID> location = new ArrayList<>();
 	private ServerID localAddress;
 	
 	public Session(ServerID localAddress, int rebootNum, int sessionNum){

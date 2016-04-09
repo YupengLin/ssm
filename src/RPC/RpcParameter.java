@@ -14,12 +14,13 @@ public class RpcParameter {
 	}
 	public static final int portPROJ1BRPC = 5300;
 	public static final int F = 1;
-	public static final int R = F + 1;
-	public static final int WQ = R;
-	public static final int W = 2 * F + 1;
+	public static final int R = 1;//F + 1;
+	public static final int WQ = 1;//R;
+	public static final int W = 1;//2 * F + 1;
 	public static final int READ = 0;
 	public static final int WRITE = 1;
 	public static final int sessionLength = 512;
+	public static  boolean localTest = true;
 	
 	/** helper function
 	 * http://stackoverflow.com/a/30968827

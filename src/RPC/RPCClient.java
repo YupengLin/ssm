@@ -37,7 +37,8 @@ public class RPCClient  {
 		rpcSocket.setSoTimeout(3000);
 		
 		byte[] encodeInfo = RpcParameter.convertToBytes(message);
-		final int[] numOfwrite = new Random().ints(0,DataBrickManager.getServerNum()).distinct().limit(RpcParameter.W).toArray();
+		//final int[] numOfwrite = new Random().ints(0,DataBrickManager.getServerNum()).distinct().limit(RpcParameter.W).toArray();
+		int[] numOfwrite = {0};
 		List<ServerID> serverList = DataBrickManager.getServerID();
 		List<ServerID> repliedBricks = new ArrayList<ServerID>();
 		for(int index : numOfwrite){
