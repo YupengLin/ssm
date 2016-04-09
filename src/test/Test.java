@@ -1,9 +1,12 @@
 package test;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import RPC.RpcParameter;
 
 public class Test {
 	public static void main(String[] args) {
@@ -21,6 +24,18 @@ public class Test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		String hello = "hello";
+		byte[] byteInfo = RpcParameter.convertToBytes(hello);
+		
+		try {
+			String back = (String) RpcParameter.convertFromBytes(byteInfo);
+			System.out.println(back);
+		} catch (ClassNotFoundException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }

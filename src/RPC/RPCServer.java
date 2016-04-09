@@ -19,7 +19,7 @@ public class RPCServer extends Thread {
 		DatagramSocket rpcSocket;
 		try {
 			rpcSocket = new DatagramSocket(RpcParameter.portPROJ1BRPC);
-		
+			rpcSocket.setSoTimeout(3000);
 		while(true) {
 			byte[] receiveData = new byte[RpcParameter.sessionLength];
 			byte[] sendData = new byte[RpcParameter.sessionLength];
@@ -28,7 +28,10 @@ public class RPCServer extends Thread {
 			InetAddress returnAddr = recvPkt.getAddress();
 			int returnPort = recvPkt.getPort();
 			ServerID clientOrigin = new ServerID(returnAddr, returnPort);
-			byte[] outBuf = computeResponseFromRequest(sendData, clientOrigin);
+		//	for(byte byteInfo : receiveData) {
+		//		System.out.print(byteInfo);
+	//		}
+			byte[] outBuf = computeResponseFromRequest(receiveData, clientOrigin);
 			DatagramPacket sendPkt = new DatagramPacket(outBuf,outBuf.length, returnAddr, returnPort);
 			rpcSocket.send(sendPkt);
 			
@@ -48,6 +51,7 @@ public class RPCServer extends Thread {
 	
 	private byte[] computeResponseFromRequest(byte[] input, ServerID clientOrigin) throws ClassNotFoundException, IOException, NullPointerException {
 		String inputmessage = (String)RpcParameter.convertFromBytes(input);
+		System.out.println("server receive : " + inputmessage);
 		String[] tokens = inputmessage.split("_");
 		/* Send message format
 		 *  callID _ READ _ sessionKey

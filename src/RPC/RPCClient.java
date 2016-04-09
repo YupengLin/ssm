@@ -37,6 +37,7 @@ public class RPCClient  {
 		rpcSocket.setSoTimeout(3000);
 		
 		byte[] encodeInfo = RpcParameter.convertToBytes(message);
+		
 		//final int[] numOfwrite = new Random().ints(0,DataBrickManager.getServerNum()).distinct().limit(RpcParameter.W).toArray();
 		int[] numOfwrite = {0};
 		List<ServerID> serverList = DataBrickManager.getServerID();
@@ -54,6 +55,7 @@ public class RPCClient  {
 			DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 			rpcSocket.receive(recvPkt);
 			String response = (String) RpcParameter.convertFromBytes(inBuf);
+			System.out.println("client receive " + response);
 		    String[] decodeInfo = response.split("_");
 		    String returnID = decodeInfo[0];
 		    if(returnID.equals(callID)) {
