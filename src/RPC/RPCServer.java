@@ -24,17 +24,20 @@ public class RPCServer extends Thread {
 			byte[] receiveData = new byte[RpcParameter.sessionLength];
 			byte[] sendData = new byte[RpcParameter.sessionLength];
 			DatagramPacket recvPkt = new DatagramPacket(receiveData, receiveData.length);
-			rpcSocket.receive(recvPkt);
-			InetAddress returnAddr = recvPkt.getAddress();
-			int returnPort = recvPkt.getPort();
-			ServerID clientOrigin = new ServerID(returnAddr, returnPort);
+			try{
+				rpcSocket.receive(recvPkt);
+				InetAddress returnAddr = recvPkt.getAddress();
+				int returnPort = recvPkt.getPort();
+				ServerID clientOrigin = new ServerID(returnAddr, returnPort);
 		//	for(byte byteInfo : receiveData) {
 		//		System.out.print(byteInfo);
 	//		}
-			byte[] outBuf = computeResponseFromRequest(receiveData, clientOrigin);
-			DatagramPacket sendPkt = new DatagramPacket(outBuf,outBuf.length, returnAddr, returnPort);
-			rpcSocket.send(sendPkt);
-			
+				byte[] outBuf = computeResponseFromRequest(receiveData, clientOrigin);
+				DatagramPacket sendPkt = new DatagramPacket(outBuf,outBuf.length, returnAddr, returnPort);
+				rpcSocket.send(sendPkt);
+			}catch(SocketTimeoutException e){
+				break;
+			}
 		}
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
@@ -45,7 +48,7 @@ public class RPCServer extends Thread {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
 		
 	}
 	
