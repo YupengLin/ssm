@@ -78,7 +78,10 @@ public class SessionManager {
 		Cookie[] cookies = null;
 		cookies = request.getCookies();
 		Cookie matchingCookie = null;
-		System.out.println(cookies.length);
+		//System.out.println(cookies.length);
+		if(cookies == null) {
+			return "";
+		}
 		for(Cookie cookie : cookies) {
 			if(cookieName.equals(cookie.getName())) {
 				matchingCookie = cookie;

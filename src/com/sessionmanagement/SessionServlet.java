@@ -54,22 +54,26 @@ public class SessionServlet extends HttpServlet {
 	      
 	      if(cookieInfo == "") {
 	    	  System.out.println("generate new session");
+	    	  this.sessionNumber += 1;
 	    	  Session newSession = SessionManager.generateNewSession(DataBrickManager.getLocalServerID(), 
 	    			  this.rebootNumber, this.sessionNumber);
-	    	  userSession = newSession;
 	    	 
 				this.rpcClient.writeTo(newSession);
-	    	
+				userSession = newSession;
 	      } else {
+	    	  System.out.println("cookie info" + cookieInfo);
 	    	  String[] tokens = cookieInfo.split("_");
 	    	  boolean [] readSuccess = new boolean[1];
 	    	  Session retrivedSession = this.rpcClient.read(readSuccess, tokens);
-	    	  
+	    	  if(!readSuccess[0]) {
+	    		  
+	    	  }
 	    	  retrivedSession.incVersion();
 	    	  retrivedSession.refreshTimeStamp();
-	    	  userSession = retrivedSession; 
+	    	 
 	    	  
 	    	  this.rpcClient.writeTo(retrivedSession);
+	    	  userSession = retrivedSession; 
 	      }
 	     
 	      

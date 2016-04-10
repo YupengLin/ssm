@@ -60,9 +60,9 @@ public class RPCClient  {
 		    String returnID = decodeInfo[0];
 		    if(returnID.equals(callID)) {
 		    	
-		    	int portNumber = Integer.parseInt(decodeInfo[2]);
-		    	InetAddress  ipAddress = InetAddress.getByName(decodeInfo[1]);
-		    	ServerID locationInfo = new ServerID(ipAddress, portNumber);
+		    	
+		    	
+		    	ServerID locationInfo = new ServerID(decodeInfo[1]);
 		    	repliedBricks.add(locationInfo);
 		    }
 			

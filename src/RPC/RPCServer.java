@@ -86,12 +86,12 @@ public class RPCServer extends Thread {
 				/* WRITE message format
 				 *  callID _ WRITE _ sessionKey_message_discardTime
 				 * */
-				String serverid = tokens[3];
-				String rebootNum = tokens[4];
-				String sessNum = tokens[5];
-				String version = tokens[6];
-				String clientMessage = tokens[7];
-				String time = tokens[8];
+				String serverid = tokens[2];
+				String rebootNum = tokens[3];
+				String sessNum = tokens[4];
+				String version = tokens[5];
+				String clientMessage = tokens[6];
+				String time = tokens[7];
 				
 				SessionManager.storeSession(serverid, rebootNum, sessNum, version, clientMessage, time, clientOrigin);
 				replyMessage = callID  + "_" + DataBrickManager.getLocalServerID().toString();
