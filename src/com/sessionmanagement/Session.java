@@ -16,7 +16,7 @@ public class Session implements Serializable {
 	private Date expirationTime;
 	private int rebootNum;
 	private int sessionNumber;
-	private List<ServerID> location = new ArrayList<>();
+	private List<ServerID> location;
 	private ServerID localAddress;
 	
 	public Session(ServerID localAddress, int rebootNum, int sessionNum){
@@ -37,7 +37,11 @@ public class Session implements Serializable {
 		this.rebootNum = rebootNum;
 		this.sessionNumber = sessionNum;
 		this.version = version;
-		this.location.addAll(targetAddress);
+		try{
+			this.location.addAll(targetAddress);
+		}catch(NullPointerException e){
+			this.location = null;
+		}
 	}
 	
 	public Session(ServerID localServerID, int rebootNum, int sessionNum, int version) {
@@ -154,12 +158,18 @@ public class Session implements Serializable {
 		
 	    sessionKey.append(this.version);
 	    sessionKey.append("_");
-	    
-	    for(ServerID sid : location) {
-	    	sessionKey.append(sid.toString());
-	    	sessionKey.append("_");
+	    try{
+	    	for(ServerID sid : location) {
+	    		sessionKey.append(sid.toString());
+	    		sessionKey.append("_");
+	    	}
 	    }
-	    return sessionKey.toString();
+	    catch(NullPointerException e){
+	    	e.printStackTrace();
+	    }
+	    String res = sessionKey.toString();
+	    int len = res.length();
+	    return res.substring(0, len-1);
 	}
 	
 	

@@ -75,10 +75,8 @@ public class SessionManager {
 	
 	
 	public static String getSessionInfoFromCookie(HttpServletRequest request) {
-		Cookie[] cookies = null;
-		cookies = request.getCookies();
+		Cookie[] cookies = request.getCookies();
 		Cookie matchingCookie = null;
-		//System.out.println(cookies.length);
 		if(cookies == null) {
 			return "";
 		}
@@ -92,6 +90,7 @@ public class SessionManager {
 		if(matchingCookie == null) {
 			return "";
 		} 
+		System.out.println(matchingCookie.getValue());
 		return matchingCookie.getValue();
 	}
 	

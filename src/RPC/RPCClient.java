@@ -94,11 +94,12 @@ public class RPCClient  {
 		/* Send message format
 		 *  callID _ READ _ sessionKey
 		 * */
-		for(ServerID server : locations) {
-			DatagramPacket sendPacket = new DatagramPacket(encodeInfo, encodeInfo.length, server.getIP(), server.getPort());
-			rpcSocket.send(sendPacket);
+		if(locations !=null){
+			for(ServerID server : locations) {
+				DatagramPacket sendPacket = new DatagramPacket(encodeInfo, encodeInfo.length, server.getIP(), server.getPort());
+				rpcSocket.send(sendPacket);
+			}
 		}
-		
 		
 		byte[] inBuf = new byte[RpcParameter.sessionLength];
 		DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
@@ -129,8 +130,10 @@ public class RPCClient  {
 			int sessionNum = Integer.parseInt(tokens[2]);
 			int version = Integer.parseInt(tokens[3]);
 			List<ServerID> answeredServerID = new ArrayList<>();
-			for(int i = 4; i < 4 + RpcParameter.WQ; i++) {
-				answeredServerID.add(new ServerID(tokens[i]));
+			if(tokens.length>4){
+				for(int i = 4; i < 4 + RpcParameter.WQ; i++) {
+					answeredServerID.add(new ServerID(tokens[i]));
+				}
 			}
 			Session sessionToBeRead = new Session(serverID, rebootNum, sessionNum, version, answeredServerID);
 			this.read(sessionToBeRead);
