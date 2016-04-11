@@ -32,11 +32,7 @@ public class RPCClient  {
 						+ session.generateSessionKey() + "_"
 						+ session.getMessage() + "_"
 						+ session.getExpirationTime();
-<<<<<<< HEAD
 		System.out.println("client message to send" + message);
-=======
-		
->>>>>>> c0135f08a7ec8e306e7dd511e044ba2b9628686e
 		DatagramSocket rpcSocket = new DatagramSocket();
 		rpcSocket.setSoTimeout(3000);
 		
@@ -55,10 +51,7 @@ public class RPCClient  {
 		}
 		session.clearLocation();
 		byte[] inBuf = new byte[RpcParameter.sessionLength];
-<<<<<<< HEAD
 		DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
-=======
->>>>>>> c0135f08a7ec8e306e7dd511e044ba2b9628686e
 		while(repliedBricks.size() < RpcParameter.WQ){
 			
 			recvPkt.setLength(inBuf.length);
@@ -66,10 +59,7 @@ public class RPCClient  {
 			rpcSocket.receive(recvPkt);
 			
 			String response = (String) RpcParameter.convertFromBytes(inBuf);
-<<<<<<< HEAD
 			System.out.println("recieved brick in client write " + response);
-=======
->>>>>>> c0135f08a7ec8e306e7dd511e044ba2b9628686e
 			System.out.println("client receive " + response);
 		    String[] decodeInfo = response.split("_");
 		    String returnID = decodeInfo[0];
