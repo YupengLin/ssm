@@ -24,6 +24,8 @@ public class ServerID {
 		this.port = Integer.parseInt(serverInfo[1]);
 		
 	}
+	
+	
 	public InetAddress getIP(){
 		return ip;
 	}

@@ -1,6 +1,9 @@
 package com.sessionmanagement;
 
 import java.net.InetAddress;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,6 +77,9 @@ public class SessionManager {
 	public static String getSessionInfoFromCookie(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
 		Cookie matchingCookie = null;
+		if(cookies == null) {
+			return "";
+		}
 		for(Cookie cookie : cookies) {
 			if(cookieName.equals(cookie.getName())) {
 				matchingCookie = cookie;
@@ -84,6 +90,7 @@ public class SessionManager {
 		if(matchingCookie == null) {
 			return "";
 		} 
+		System.out.println(matchingCookie.getValue());
 		return matchingCookie.getValue();
 	}
 	
@@ -109,6 +116,49 @@ public class SessionManager {
 			wLock.unlock();
 		}
 	}
+	
+	
+	public static void storeSession(String serverid, String rebootNum, String sessNum, String version,
+			String clientMessage, String time, ServerID clientOrigin) {
+		// TODO Auto-generated method stub
+		String sessionKey = serverid + "_" + rebootNum + "_" + sessNum + "_" + version;
+		ServerID localServerId = new ServerID(serverid);
+		int reboot_num = Integer.parseInt(rebootNum);
+		int sess_num = Integer.parseInt(sessNum);
+		int version_num = Integer.parseInt(version);
+		
+		DateFormat dateFormatter = new SimpleDateFormat ( "E MMM dd HH:mm:ss Z yyyy" );
+		Date discardTime = null;
+		try {
+			
+			discardTime = dateFormatter.parse(time);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		Session sessionToStore = new Session(localServerId, reboot_num, sess_num, version_num);
+		
+		sessionToStore.setExpirationTime(discardTime);
+		sessionToStore.ResetMessage(clientMessage);
+		sessionToStore.addLocation(clientOrigin);
+		System.out.println("session key to store " + sessionKey);
+		wLock.lock();
+		try{
+			if(!sessionContainer.containsKey(sessionKey)) {
+				System.out.println("new session in hashtable");
+				sessionContainer.put(sessionKey, sessionToStore);
+			} else {
+				System.out.println("update exist session in hashtable");
+				Session existSession = sessionContainer.get(sessionKey);
+				existSession.addLocation(clientOrigin);
+				existSession.ResetMessage(clientMessage);
+				existSession.setExpirationTime(discardTime);
+				sessionContainer.put(sessionKey, existSession);
+			}
+		} finally {
+			wLock.unlock();
+		}
+	}
+	
 	/**
 	 * timer thread to check session expiration time every one second
 	 */
@@ -123,6 +173,7 @@ public class SessionManager {
 		rLock.lock();
 		try{
 		  if(sessionContainer.containsKey(key)) {
+			  System.out.println("locate session in hashtable");
 			  session = sessionContainer.get(key);
 		  }
 		} finally{
@@ -135,23 +186,24 @@ public class SessionManager {
 
 		@Override
 		public void run() {
-			wLock.lock();
-			try{
-				Iterator<String> it = sessionContainer.keySet().iterator();
-				while(it.hasNext()) {
-					
-					String sessionID = (String) it.next();
-					Session session = sessionContainer.get(sessionID);
-					if(session.getExpirationInSecond().before(new Date())) {
-						sessionContainer.remove(sessionID);
-					}
-				}
-			}finally{
-				wLock.unlock();
-			}
+//			wLock.lock();
+//			try{
+//				Iterator<String> it = sessionContainer.keySet().iterator();
+//				while(it.hasNext()) {
+//					
+//					String sessionID = (String) it.next();
+//					Session session = sessionContainer.get(sessionID);
+//					if(session.getExpirationInSecond().before(new Date())) {
+//						sessionContainer.remove(sessionID);
+//					}
+//				}
+//			}finally{
+//				wLock.unlock();
+//			}
 			
 		}
 		
 	}
+	
 
 }

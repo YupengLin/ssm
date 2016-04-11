@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import RPC.RPCClient;
+import RPC.RPCServer;
 import RPC.RpcParameter;
 
 /**
@@ -23,6 +24,7 @@ public class SessionServlet extends HttpServlet {
     private int sessionNumber = 0;
     private int rebootNumber = 0;
     private RPCClient rpcClient = null;
+    private RPCServer rpcServer = null;
     /** start the auto check timer thread
      * @see HttpServlet#HttpServlet()
      */
@@ -31,6 +33,8 @@ public class SessionServlet extends HttpServlet {
         // TODO Auto-generated constructor stub
         SessionManager.cleanExpiredSession();
         rpcClient = new RPCClient();
+        rpcServer = new RPCServer();
+        rpcServer.start();
     }
 
 	/**
@@ -50,27 +54,29 @@ public class SessionServlet extends HttpServlet {
 	      
 	      if(cookieInfo == "") {
 	    	  System.out.println("generate new session");
+	    	  this.sessionNumber += 1;
 	    	  Session newSession = SessionManager.generateNewSession(DataBrickManager.getLocalServerID(), 
 	    			  this.rebootNumber, this.sessionNumber);
-	    	  userSession = newSession;
-	    	  try {
-				this.rpcClient.write(newSession);
-	    	  } catch (ClassNotFoundException e) {
-				
-				e.printStackTrace();
-			}
+	    	 
+				this.rpcClient.writeTo(newSession);
+				userSession = newSession;
 	      } else {
+	    	  System.out.println("cookie info" + cookieInfo);
 	    	  String[] tokens = cookieInfo.split("_");
 	    	  boolean [] readSuccess = new boolean[1];
 	    	  Session retrivedSession = this.rpcClient.read(readSuccess, tokens);
+	    	  System.out.println("finish read");
+	    	  if(!readSuccess[0]) {
+	    	      retrivedSession = SessionManager.generateNewSession(DataBrickManager.getLocalServerID(), this.rebootNumber, this.sessionNumber);
+	    	  } else {
+	    		  System.out.println("retrived session info " + retrivedSession.generateInfo());
+	    		  retrivedSession.incVersion();
+	    		  retrivedSession.refreshTimeStamp();
+	    	  }
+	    	 
 	    	  
-	    	  retrivedSession.incVersion();
-	    	  retrivedSession.refreshTimeStamp();
+	    	  this.rpcClient.writeTo(retrivedSession);
 	    	  userSession = retrivedSession; 
-	    	  
-	    	  
-	    	  
-	    	  this.rpcClient.writeTo(retrivedSession, "", "", null);
 	      }
 	     
 	      
@@ -86,7 +92,7 @@ public class SessionServlet extends HttpServlet {
 	    		  String updatedMessage = request.getParameter("replacedText");
 	    		  userSession.resetVersion();
 	    		  userSession.ResetMessage(updatedMessage);
-	    		  this.rpcClient.writeTo(userSession, null, null, null);
+	    		  this.rpcClient.writeTo(userSession);
 	      		}else if(userBehavior.equals("LOGOUT")){
 	      		  try{
 	      		  userSession.setMaxInterval(0);

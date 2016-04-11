@@ -1,6 +1,7 @@
 package com.sessionmanagement;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +16,7 @@ public class Session implements Serializable {
 	private Date expirationTime;
 	private int rebootNum;
 	private int sessionNumber;
-	private List<ServerID> location;
+	private List<ServerID> location = new ArrayList<ServerID>();
 	private ServerID localAddress;
 	
 	public Session(ServerID localAddress, int rebootNum, int sessionNum){
@@ -36,7 +37,15 @@ public class Session implements Serializable {
 		this.rebootNum = rebootNum;
 		this.sessionNumber = sessionNum;
 		this.version = version;
-		this.location.addAll(targetAddress);
+		try{
+			this.location.addAll(targetAddress);
+		}catch(NullPointerException e){
+			this.location = null;
+		}
+		this.lastActive = new Date();
+		this.expirationTime = new Date(this.lastActive.getTime() + 1000 * this.maxInterval);
+
+		
 	}
 	
 	public Session(ServerID localServerID, int rebootNum, int sessionNum, int version) {
@@ -80,6 +89,8 @@ public class Session implements Serializable {
 		return this.expirationTime;
 	}
 	
+
+	
 	public void setMaxInterval(int second) {
 		this.maxInterval = second;
 		
@@ -88,11 +99,13 @@ public class Session implements Serializable {
 	
 	public void refreshTimeStamp(){
 		lastActive = new Date();
+		System.out.println("check whether expire is null " + expirationTime.toString());
 		this.expirationTime.setTime(this.lastActive.getTime() + maxInterval * 1000);
 	}
-	/**
-	 * 
-	 */
+	
+	public void setExpirationTime(Date time){
+		this.expirationTime = time;
+	}
 	public void addLocation(ServerID serverId) {
 		this.location.add(serverId);
 		
@@ -150,10 +163,14 @@ public class Session implements Serializable {
 		
 	    sessionKey.append(this.version);
 	    sessionKey.append("_");
+	 
+	   for(ServerID sid : location) {
+	    		sessionKey.append(sid.toString());
+	    		sessionKey.append("_");
+	    }
 	    
-	    for(ServerID sid : location) {
-	    	sessionKey.append(sid.toString());
-	    	sessionKey.append("_");
+	    if(sessionKey.charAt(sessionKey.length() - 1) == '_') {
+	    	sessionKey.setLength(sessionKey.length() - 1);
 	    }
 	    return sessionKey.toString();
 	}
