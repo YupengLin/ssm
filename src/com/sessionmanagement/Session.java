@@ -42,10 +42,13 @@ public class Session implements Serializable {
 		}catch(NullPointerException e){
 			this.location = null;
 		}
+<<<<<<< HEAD
 		this.lastActive = new Date();
 		this.expirationTime = new Date(this.lastActive.getTime() + 1000 * this.maxInterval);
 
 		
+=======
+>>>>>>> c0135f08a7ec8e306e7dd511e044ba2b9628686e
 	}
 	
 	public Session(ServerID localServerID, int rebootNum, int sessionNum, int version) {
@@ -163,6 +166,7 @@ public class Session implements Serializable {
 		
 	    sessionKey.append(this.version);
 	    sessionKey.append("_");
+<<<<<<< HEAD
 	 
 	   for(ServerID sid : location) {
 	    		sessionKey.append(sid.toString());
@@ -171,8 +175,20 @@ public class Session implements Serializable {
 	    
 	    if(sessionKey.charAt(sessionKey.length() - 1) == '_') {
 	    	sessionKey.setLength(sessionKey.length() - 1);
+=======
+	    try{
+	    	for(ServerID sid : location) {
+	    		sessionKey.append(sid.toString());
+	    		sessionKey.append("_");
+	    	}
 	    }
-	    return sessionKey.toString();
+	    catch(NullPointerException e){
+	    	e.printStackTrace();
+>>>>>>> c0135f08a7ec8e306e7dd511e044ba2b9628686e
+	    }
+	    String res = sessionKey.toString();
+	    int len = res.length();
+	    return res.substring(0, len-1);
 	}
 	
 	

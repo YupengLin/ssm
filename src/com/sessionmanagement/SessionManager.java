@@ -140,6 +140,7 @@ public class SessionManager {
 		sessionToStore.setExpirationTime(discardTime);
 		sessionToStore.ResetMessage(clientMessage);
 		sessionToStore.addLocation(clientOrigin);
+<<<<<<< HEAD
 		System.out.println("session key to store " + sessionKey);
 		wLock.lock();
 		try{
@@ -148,6 +149,14 @@ public class SessionManager {
 				sessionContainer.put(sessionKey, sessionToStore);
 			} else {
 				System.out.println("update exist session in hashtable");
+=======
+		
+		wLock.lock();
+		try{
+			if(!sessionContainer.containsKey(sessionKey)) {
+				sessionContainer.put(sessionKey, sessionToStore);
+			} else {
+>>>>>>> c0135f08a7ec8e306e7dd511e044ba2b9628686e
 				Session existSession = sessionContainer.get(sessionKey);
 				existSession.addLocation(clientOrigin);
 				existSession.ResetMessage(clientMessage);

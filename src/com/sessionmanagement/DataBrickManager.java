@@ -5,6 +5,10 @@ import java.util.List;
 
 public class DataBrickManager {
 	
+<<<<<<< HEAD
+=======
+	
+>>>>>>> c0135f08a7ec8e306e7dd511e044ba2b9628686e
 	public static boolean localTest = true;
 	public static List<ServerID> getServerID(){
 		if(localTest) {
