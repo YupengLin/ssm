@@ -34,16 +34,17 @@ public class RPCClient  {
 						+ session.getExpirationTime();
 		System.out.println("client message to send" + message);
 		DatagramSocket rpcSocket = new DatagramSocket();
-		rpcSocket.setSoTimeout(3000);
+		rpcSocket.setSoTimeout(30000);
 		
 		byte[] encodeInfo = RpcParameter.convertToBytes(message);
 		
 		//final int[] numOfwrite = new Random().ints(0,DataBrickManager.getServerNum()).distinct().limit(RpcParameter.W).toArray();
-		int[] numOfwrite = {0};
+		int[] numOfwrite = {0, 1};
 		List<ServerID> serverList = DataBrickManager.getServerID();
 		List<ServerID> repliedBricks = new ArrayList<ServerID>();
 		for(int index : numOfwrite){
 			ServerID s = serverList.get(index);
+			System.out.println("target ip address " + s.toString());
 	        DatagramPacket sendPkt = new DatagramPacket(encodeInfo, encodeInfo.length, s.getIP(), s.getPort());
 	        rpcSocket.send(sendPkt);
 	        
@@ -52,15 +53,17 @@ public class RPCClient  {
 		session.clearLocation();
 		byte[] inBuf = new byte[RpcParameter.sessionLength];
 		DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
+		System.out.println("received item number outside" + repliedBricks.size());
 		while(repliedBricks.size() < RpcParameter.WQ){
-			
+			System.out.println("received item number " + repliedBricks.size());
 			recvPkt.setLength(inBuf.length);
-			rpcSocket.setSoTimeout(3000);
+			//rpcSocket.setSoTimeout(3000);
 			rpcSocket.receive(recvPkt);
 			
 			String response = (String) RpcParameter.convertFromBytes(inBuf);
+			//System.out.println("1111111111111++++++++++++++++++");
 			System.out.println("recieved brick in client write " + response);
-			System.out.println("client receive " + response);
+			//System.out.println("22222222222222++++++++++++++++++");
 		    String[] decodeInfo = response.split("_");
 		    String returnID = decodeInfo[0];
 		    if(returnID.equals(callID)) {
@@ -84,7 +87,8 @@ public class RPCClient  {
 	 * */
 	
 
-	public void read(Session session) throws IOException, ClassNotFoundException, EmptyBodyException, CorruptedCookieInfoException, NullPointerException{
+	public boolean read(Session session) throws IOException, ClassNotFoundException, EmptyBodyException, CorruptedCookieInfoException, NullPointerException{
+		boolean readSuccess = false;
 		String callID = UUID.randomUUID().toString();
 		
 		String queryMessage = "";
@@ -95,7 +99,7 @@ public class RPCClient  {
 		queryMessage += session.generateSessionKey();
 		
 		DatagramSocket rpcSocket = new DatagramSocket();
-		rpcSocket.setSoTimeout(2000);
+		rpcSocket.setSoTimeout(30000);
 		byte[] encodeInfo = RpcParameter.convertToBytes(queryMessage);
 		List<ServerID> locations = session.getLocation();
 		/* Send message format
@@ -122,6 +126,7 @@ public class RPCClient  {
 		} while (!decodeInfo[0].equals(callID));
 		if(decodeInfo.length == 2) {
 		// contain valid caller id and message
+			readSuccess = true;
 			session.ResetMessage(decodeInfo[1]);
 		}
 		//else {
@@ -129,7 +134,7 @@ public class RPCClient  {
 		//}
 		
 		rpcSocket.close();
-		
+		return readSuccess;
 		
 	
 	}
@@ -148,11 +153,12 @@ public class RPCClient  {
 				}
 			}
 			Session sessionToBeRead = new Session(serverID, rebootNum, sessionNum, version, answeredServerID);
-			this.read(sessionToBeRead);
-			flag[0] = true;
+			
+			flag[0] = this.read(sessionToBeRead);
 			return sessionToBeRead;
 		
 		} catch (CorruptedCookieInfoException e) {
+		
 			flag[0] = false;
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {

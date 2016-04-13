@@ -1,6 +1,11 @@
 package test;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,7 +14,7 @@ import java.util.Date;
 import RPC.RpcParameter;
 
 public class Test {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnknownHostException, SocketException {
 		Date curr = new Date();
 		System.out.println(curr.toString());
 		//curr.setTime(curr.getTime() + 5000);
@@ -32,6 +37,19 @@ public class Test {
 			String back = (String) RpcParameter.convertFromBytes(byteInfo);
 			System.out.println(back);
 		} catch (ClassNotFoundException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		InetAddress address = InetAddress.getByName("10.128.136.51");
+		int port = 5300;
+		DatagramSocket socket = new DatagramSocket(5300);
+		DatagramPacket packet = new DatagramPacket(byteInfo, byteInfo.length, 
+                address, 5300);
+		try {
+			socket.send(packet);
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

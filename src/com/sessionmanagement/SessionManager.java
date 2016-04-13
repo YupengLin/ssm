@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -24,7 +25,7 @@ public class SessionManager {
 	protected final static Lock rLock = rwl.readLock();
 	protected final static Lock wLock = rwl.writeLock();
 	private final static String cookieName = "CS5300PROJ1SESSION";
-	protected static HashMap<String, Session> sessionContainer = new HashMap<>();
+	protected static ConcurrentHashMap<String, Session> sessionContainer = new ConcurrentHashMap<>();
 	protected static int ONESECOND = 1 * 1000;
 	/**
 	 * parse request cookie, get the session from cookie
@@ -186,20 +187,20 @@ public class SessionManager {
 
 		@Override
 		public void run() {
-//			wLock.lock();
-//			try{
-//				Iterator<String> it = sessionContainer.keySet().iterator();
-//				while(it.hasNext()) {
-//					
-//					String sessionID = (String) it.next();
-//					Session session = sessionContainer.get(sessionID);
-//					if(session.getExpirationInSecond().before(new Date())) {
-//						sessionContainer.remove(sessionID);
-//					}
-//				}
-//			}finally{
-//				wLock.unlock();
-//			}
+			wLock.lock();
+			try{
+				Iterator<String> it = sessionContainer.keySet().iterator();
+				while(it.hasNext()) {
+					
+					String sessionID = (String) it.next();
+					Session session = sessionContainer.get(sessionID);
+					if(session.getExpirationInSecond().before(new Date())) {
+						sessionContainer.remove(sessionID);
+					}
+				}
+			}finally{
+				wLock.unlock();
+			}
 			
 		}
 		

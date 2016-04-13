@@ -67,6 +67,7 @@ public class SessionServlet extends HttpServlet {
 	    	  Session retrivedSession = this.rpcClient.read(readSuccess, tokens);
 	    	  System.out.println("finish read");
 	    	  if(!readSuccess[0]) {
+	    		  System.out.println("server does not read the session in hashtable, generate new session");
 	    	      retrivedSession = SessionManager.generateNewSession(DataBrickManager.getLocalServerID(), this.rebootNumber, this.sessionNumber);
 	    	  } else {
 	    		  System.out.println("retrived session info " + retrivedSession.generateInfo());

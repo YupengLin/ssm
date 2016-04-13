@@ -9,7 +9,8 @@ public class DataBrickManager {
 	public static List<ServerID> getServerID(){
 		if(localTest) {
 			List<ServerID> localServer = new ArrayList<ServerID>();
-			localServer.add(new ServerID("127.0.0.1:5300"));
+			localServer.add(new ServerID("10.128.138.113:5300"));
+			localServer.add(new ServerID("10.128.128.186:5300"));
 			return localServer;
 			
 		}
@@ -30,7 +31,7 @@ public class DataBrickManager {
 	
 	public static ServerID getLocalServerID() {
 		if(localTest) {
-			return new ServerID("127.0.0.1:5300");
+			return new ServerID("10.128.128.186:5300");
 		}
 		return null;
 	}
