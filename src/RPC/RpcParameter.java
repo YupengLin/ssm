@@ -16,7 +16,7 @@ public class RpcParameter {
 	public static final int F = 1;
 	public static final int R = 2;//F + 1;
 	public static final int WQ = 2;//R;
-	public static final int W = 2;//2 * F + 1;
+	public static final int W = 3;//2 * F + 1;
 	public static final int READ = 0;
 	public static final int WRITE = 1;
 	public static final int sessionLength = 512;

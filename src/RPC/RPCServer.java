@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
+import org.json.simple.parser.ParseException;
+
 import com.sessionmanagement.DataBrickManager;
 import com.sessionmanagement.ServerID;
 import com.sessionmanagement.Session;
@@ -15,8 +17,7 @@ import com.sessionmanagement.SessionManager;
 public class RPCServer extends Thread {
 	
 	public void run() {
-		
-		
+				
 		DatagramSocket rpcSocket = null;
 		try {
 			rpcSocket = new DatagramSocket(RpcParameter.portPROJ1BRPC);
@@ -57,11 +58,17 @@ public class RPCServer extends Thread {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		}
 	}
 	
-	private byte[] computeResponseFromRequest(byte[] input, ServerID clientOrigin) throws ClassNotFoundException, IOException, NullPointerException {
+	private byte[] computeResponseFromRequest(byte[] input, ServerID clientOrigin) throws ClassNotFoundException, IOException, NullPointerException, ParseException {
 		String inputmessage = (String)RpcParameter.convertFromBytes(input);
 		System.out.println("server receive : " + inputmessage);
 		String[] tokens = inputmessage.split("_");
@@ -77,8 +84,7 @@ public class RPCServer extends Thread {
 				Session retrivedSession = null;
 				
 				if(tokens.length == 6) {
-					
-				
+								
 				String serverid = tokens[2];
 				String rebootNum = tokens[3];
 				String sessNum = tokens[4];

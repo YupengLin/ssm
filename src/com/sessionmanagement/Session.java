@@ -12,7 +12,7 @@ public class Session implements Serializable {
 	private int version;
 	private String sessionMessage;
 	private Date lastActive;
-	private int maxInterval = 10;
+	private int maxInterval = 1;
 	private Date expirationTime;
 	private int rebootNum;
 	private int sessionNumber;
@@ -24,7 +24,7 @@ public class Session implements Serializable {
 		this.version = 1;
 		this.sessionMessage = "Hello User";
 		this.lastActive = new Date();
-		this.maxInterval = 10; // 30 seconds
+		this.maxInterval = 1; // 30 seconds
 		this.expirationTime = new Date(this.lastActive.getTime() + 1000 * this.maxInterval);
 		this.localAddress = localAddress;
 		this.rebootNum = rebootNum;
@@ -89,12 +89,20 @@ public class Session implements Serializable {
 		return this.expirationTime;
 	}
 	
-
+    public String getCookieMessage() {
+    	String cookieMessage = this.getID() + "_" + this.rebootNum + "_" + this.sessionNumber + "_"
+    			               + this.getVersion();
+    	return cookieMessage;
+    }
 	
 	public void setMaxInterval(int second) {
 		this.maxInterval = second;
 		
 		this.expirationTime.setTime(this.lastActive.getTime() + maxInterval * 1000);
+	}
+	
+	public void expireSession(){
+		this.expirationTime.setTime(new Date().getTime());
 	}
 	
 	public void refreshTimeStamp(){
@@ -148,6 +156,9 @@ public class Session implements Serializable {
 	
 	public void incSessionNumber(){
 		this.sessionNumber += 1;
+	}
+	public int getRebootNum() {
+		return this.rebootNum;
 	}
 	
 	public String generateInfo() {

@@ -27,6 +27,7 @@ public class SessionManager {
 	private final static String cookieName = "CS5300PROJ1SESSION";
 	protected static ConcurrentHashMap<String, Session> sessionContainer = new ConcurrentHashMap<>();
 	protected static int ONESECOND = 1 * 1000;
+	protected static final String cookieDomain = ".dj327.bigdata.systems";
 	/**
 	 * parse request cookie, get the session from cookie
 	 * @param request
@@ -38,6 +39,7 @@ public class SessionManager {
 		Cookie[] cookies = request.getCookies();
 	    Cookie matchingCookie = null;
 		for( Cookie cookie : cookies ) {
+			System.out.println("cookie name" + cookie.getName());
 			if(cookieName.equals(cookie.getName())) {
 				matchingCookie = cookie;
 				break;
@@ -54,7 +56,7 @@ public class SessionManager {
 		return sessionInRecord;
 	}
 	/**
-	 * helper function to get the seesion from cookie
+	 * helper function to get the session from cookie
 	 * @param cookie
 	 * @return
 	 */
@@ -101,11 +103,15 @@ public class SessionManager {
 	 */
 	public static Session generateNewSession(ServerID localAddress, int rebootNum, int sessionNum) {
 		// TODO Auto-generated method stub
+		System.out.println("local address " + localAddress.toString());
 		return new Session(localAddress, rebootNum,  sessionNum);
 	}
 	
 	public static void addNewCookie(HttpServletResponse response, Session session) {
 		Cookie cookie = new Cookie(cookieName, session.generateInfo());
+		cookie.setDomain(cookieDomain);
+		cookie.setPath("/");
+		cookie.setMaxAge(60*9);
 		response.addCookie(cookie);
 	}
 	

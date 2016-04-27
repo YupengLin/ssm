@@ -22,6 +22,11 @@
   
   
 </form>
-<p>Cookie  ${sessionID}   Expires ${expirationDate}</p>
+<p>Cookie  ${cookieMessage} </p>  
+<p>Expires ${expirationDate} </p>
+<p>MetaData ${metaData} </p>
+<p>RebootNumber ${rebootNum} </p> 
+<%-- <p> Found session in ${sessionLocation}</p> --%>
+
 </body>
 </html>

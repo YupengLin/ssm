@@ -19,6 +19,8 @@ import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 
+import org.json.simple.parser.ParseException;
+
 import com.sessionmanagement.DataBrickManager;
 import com.sessionmanagement.ServerID;
 import com.sessionmanagement.Session;
@@ -26,7 +28,7 @@ import com.sessionmanagement.Session;
 public class RPCClient  {
 	
 	
-	public void write(Session session) throws IOException, ClassNotFoundException {
+	public void write(Session session) throws IOException, ClassNotFoundException, ParseException {
 		String callID = UUID.randomUUID().toString();
 		String message = callID + "_"  + new Integer(RpcParameter.WRITE).toString() + "_" 
 						+ session.generateSessionKey() + "_"
@@ -39,7 +41,7 @@ public class RPCClient  {
 		byte[] encodeInfo = RpcParameter.convertToBytes(message);
 		
 		//final int[] numOfwrite = new Random().ints(0,DataBrickManager.getServerNum()).distinct().limit(RpcParameter.W).toArray();
-		int[] numOfwrite = {0, 1};
+		int[] numOfwrite = {0, 1, 2};
 		List<ServerID> serverList = DataBrickManager.getServerID();
 		List<ServerID> repliedBricks = new ArrayList<ServerID>();
 		for(int index : numOfwrite){
@@ -57,7 +59,7 @@ public class RPCClient  {
 		while(repliedBricks.size() < RpcParameter.WQ){
 			System.out.println("received item number " + repliedBricks.size());
 			recvPkt.setLength(inBuf.length);
-			//rpcSocket.setSoTimeout(3000);
+			//rpcSocket.setSoTimeout(30000);
 			rpcSocket.receive(recvPkt);
 			
 			String response = (String) RpcParameter.convertFromBytes(inBuf);
@@ -105,7 +107,7 @@ public class RPCClient  {
 		/* Send message format
 		 *  callID _ READ _ sessionKey
 		 * */
-		if(locations !=null){
+		if(locations != null){
 			for(ServerID server : locations) {
 				DatagramPacket sendPacket = new DatagramPacket(encodeInfo, encodeInfo.length, server.getIP(), server.getPort());
 				rpcSocket.send(sendPacket);
@@ -117,7 +119,7 @@ public class RPCClient  {
 		String[] decodeInfo = null;
 		do{
 			recvPkt.setLength(inBuf.length);
-			rpcSocket.setSoTimeout(3000);
+			rpcSocket.setSoTimeout(300000);
 			rpcSocket.receive(recvPkt);
 			
 			String response = (String) RpcParameter.convertFromBytes(inBuf);
@@ -142,12 +144,13 @@ public class RPCClient  {
 	public Session read(boolean[] flag, String[] tokens) {
 		 //  svrID_rebootNum_sessNum_version_S1_S2 ... Swq
 		try {
+			System.out.println("begin read");
 			ServerID serverID = new ServerID(tokens[0]);
 			int rebootNum = Integer.parseInt(tokens[1]);
 			int sessionNum = Integer.parseInt(tokens[2]);
 			int version = Integer.parseInt(tokens[3]);
 			List<ServerID> answeredServerID = new ArrayList<>();
-			if(tokens.length>4){
+			if(tokens.length > 4){
 				for(int i = 4; i < 4 + RpcParameter.WQ; i++) {
 					answeredServerID.add(new ServerID(tokens[i]));
 				}
@@ -178,9 +181,11 @@ public class RPCClient  {
 	}
 	
 
-	public void writeTo(Session session) {
+	public void writeTo(Session session)  {
 		try {
+			System.out.println("begin to write");
 			this.write(session);
+			System.out.println("end to write");
 			
 		} catch (CorruptedCookieInfoException e) {
 			e.printStackTrace();
@@ -189,6 +194,9 @@ public class RPCClient  {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NullPointerException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
